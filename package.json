@@ -1,0 +1,25 @@
+{
+  "name": "serve-fallback",
+  "version": "1.0.0",
+  "description": "Node server middleware to serve a fallback page, relative to the url, instead of a 404 response",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vellerefond/serve-fallback.git"
+  },
+  "author": "Spyridon Alfredos Desyllas <sadesyllas@gmail.com>",
+  "license": "\tLGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/vellerefond/serve-fallback/issues"
+  },
+  "homepage": "https://github.com/vellerefond/serve-fallback#readme",
+  "engines": {
+    "node": ">= 5.0.0"
+  },
+  "dependencies": {
+    "lodash": "^4.2.1"
+  }
+}
