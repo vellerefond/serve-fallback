@@ -15,7 +15,7 @@ module.exports = (options) => {
     const reqUrl = url.parse(req.url);
     let relativeFilePath = reqUrl.pathname.replace(/^\/|\/$/, '');
     while (!fs.existsSync(path.resolve(options.root, relativeFilePath))) {
-      req.url = `/${relativeFilePath = _.initial(relativeFilePath.split(/\//)).join('/')}/${options.fallback}`
+      req.url = `/${relativeFilePath = _.initial(relativeFilePath.split(/\//)).join('/')}/${options.fallback}`.replace(/^\/\//, '/')
       + (reqUrl.search || '')
       + (reqUrl.hash || '');
       if (!options.recurse)
