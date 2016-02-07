@@ -18,7 +18,13 @@ then it's sometimes desirable to always fallback to them if a 404 error code wou
   fallback: 'index.html',
 
   // whether or not to recurse backwards trying to find a valid fallback file to serve
-  recurse: true
+  recurse: true,
+
+  // whether or not to unconditionally fall back to serving the fallback file from root
+  fallbackToRoot: false,
+
+  // optional function that accepts a message to log what serve-fallback will serve for each request
+  log: null
 }
 ```
 
@@ -30,7 +36,10 @@ const serveFallback = require('serve-fallback');
 // then, using the middleware configuration of browser-sync as an example:
 {
   ...,
-  middleware: [ ..., serveFallback({ root: 'path/to/served/directory', fallback: 'default.html' }), ... ],
+  middleware: [ ..., serveFallback({
+    root: 'path/to/served/directory',
+    fallback: 'default.html'
+  }), ... ],
   ...
 }
 ```
@@ -50,11 +59,11 @@ Given the following directory structure:
 
 then the following table maps possibly requested paths to what is actually served (assuming the fallback filename is _index.html_):
 
-| url requested | url modified (- (dash) means no modification) |
-| :---: | :---: |
-| / | - |
-| /foo | - |
-| /bar | - |
-| /abc | /index.html |
-| /foo/abc | /foo/index.html |
-| /bar/abc/xyz | options.recurse ? /bar/index.html : whatever the next middleware returns |
+| url requested | url modified (fallbackToRoot === false) | url modified (fallbackToRoot === true) |
+| :---: | :---: | :---: |
+| / | (no modification) | (no modification) |
+| /foo | (no modification) | (no modification) |
+| /bar | (no modification) | (no modification) |
+| /abc | /index.html | /index.html |
+| /foo/abc | /foo/index.html | /index.html |
+| /bar/abc/xyz | options.recurse ? /bar/index.html : whatever the next middleware returns | /index.html |
