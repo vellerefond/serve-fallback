@@ -9,6 +9,8 @@ then it's sometimes desirable to always fallback to them if a 404 error code wou
 
 ## options
 
+The value following each option is the default in case the relevant property is not specified on initialization.
+
 ```javascript
 {
   // the path to the served directory (default: .)
@@ -22,6 +24,15 @@ then it's sometimes desirable to always fallback to them if a 404 error code wou
 
   // whether or not to unconditionally fall back to serving the fallback file from root
   fallbackToRoot: false,
+
+  // whether or not to use lodash's memoize function to check for path existence only once per path
+  memoizePathChecks: true,
+
+  // the cache constructor to use for the memoized paths (must use the )
+  memoizeCacheConstructor: Map,
+
+  // the maximum paths numbers to optimize before the cache is cleared to avoid excessive memory usage
+  memoizedPathsMax: 1000,
 
   // optional function that accepts a message to log what serve-fallback will serve for each request
   log: null

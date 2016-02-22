@@ -12,8 +12,13 @@ module.exports = (options) =>
 		fallback: 'index.html',
 		recurse: true,
 		fallbackToRoot: false,
+		memoizePathChecks: true,
+		memoizeCacheConstructor: Map,
+		memoizedPathsMax: 1000,
 		log: null,
 	}, _.isPlainObject(options) ? options : {});
+
+	_.memoize.Cache = options.memoizeCacheConstructor;
 
 	const log = msg =>
 	{
@@ -22,12 +27,15 @@ module.exports = (options) =>
 		options.log(`serve-fallback: ${msg}`);
 	};
 
+	const fsExistsSyncWrapper = path => fs.existsSync(path);
+	const fsExistsSyncProxy = options.memoizePathChecks ? _.memoize(fsExistsSyncWrapper) : fsExistsSyncWrapper;
+
 	return (req, res, next) =>
 	{
 		const reqUrl = url.parse(req.url);
 		let relativeFilePath = reqUrl.pathname.replace(/^\/|\/$/, '');
 
-		if (!fs.existsSync(path.resolve(options.root, relativeFilePath))) {
+		if (!fsExistsSyncProxy(path.resolve(options.root, relativeFilePath))) {
 			if (options.fallbackToRoot)
 				// unconditionally serve the fallback relative to the served directory
 				req.url = `/${options.fallback}`;
@@ -51,7 +59,7 @@ module.exports = (options) =>
 					 * if the fallback file ddoes not exist in the current relative file path,
 					 * try one level up, if recursion is enabled
 					 */
-					if (!fs.existsSync(path.resolve(options.root, relativeFilePath, options.fallback)))
+					if (!fsExistsSyncProxy(path.resolve(options.root, relativeFilePath, options.fallback)))
 						continue;
 
 					req.url = `/${relativeFilePath}/${options.fallback}`.replace(/^\/\//, '/')
@@ -66,13 +74,16 @@ module.exports = (options) =>
 			 * from the served directory
 			 */
 			if (/^\/?$/.test(relativeFilePath.trim())
-			|| !fs.existsSync(path.resolve(options.root, relativeFilePath, options.fallback))) {
+			|| !fsExistsSyncProxy(path.resolve(options.root, relativeFilePath, options.fallback))) {
 				req.url = `/${options.fallback}`;
 				log(`will ${options.fallbackToRoot ? 'unconditionally ' : ''}serve ${req.url}`);
 			}
 		} else {
 			log(`will pass through ${req.url}`);
 		}
+
+		if (options.memoizePathChecks && fsExistsSyncProxy.cache.size > options.memoizedPathsMax)
+			fsExistsSyncProxy.cache.clear();
 
 		if (_.isFunction(next))
 			return next();
